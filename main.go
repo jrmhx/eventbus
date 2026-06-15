@@ -1,32 +1,22 @@
 package main
 
-type Subscriber struct {
-	name    string
-	eventCh chan string
-}
+import (
+	"fmt"
+
+	eventbus "github.com/jrmhx/eventbus/internal"
+)
 
 func main() {
-	dns := Subscriber{
-		"DNS",
-		make(chan string),
-	}
+	bus := eventbus.NewBus()
+	sub := bus.Subscribe("123")
 
-	logger := Subscriber{
-		"logger",
-		make(chan string),
-	}
+	go bus.Publish("123")
+	go bus.Publish("456")
+	go bus.Publish("123")
 
-	// node publish a changeIP event
+	evt1 := <-sub.Event()
+	fmt.Println(evt1)
 
-	ev := "changeIP"
-
-	dns.eventCh <- ev
-	logger.eventCh <- ev
+	ev2 := <-sub.Event()
+	fmt.Println(ev2)
 }
-
-// publisher --event(string)--> subscriber (by chan string)
-// need to improve:
-// 1. publisher highly coupled with subscriber, pub needs to manage sub life cycle
-//  sol: introduce Bus as a global eventbus hub/manager/... that pub -> bus -> sub
-// 2. event are just string, not using type checking
-//  sol: Generics Subcriber[T]

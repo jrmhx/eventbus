@@ -7,6 +7,7 @@ type subscriber interface {
 	dispatch(evt any)
 }
 
+// Subscriber receives events of type E from a Bus.
 type Subscriber[E any] struct {
 	typ  reflect.Type
 	read chan E
@@ -25,6 +26,7 @@ func (s *Subscriber[E]) dispatch(evt any) {
 	s.read <- v
 }
 
+// Event returns the channel that delivers subscribed events.
 func (s *Subscriber[E]) Event() <-chan E {
 	return s.read
 }

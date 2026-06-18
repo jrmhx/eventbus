@@ -5,20 +5,19 @@ import (
 	"sync"
 )
 
-// a global component that:
-// manage event routes (map)
-// using string to represent evt for the current stadge
-
+// Bus routes published events to subscribers of the same concrete type.
 type Bus struct {
 	topicsMu sync.Mutex
 	topics   map[reflect.Type][]subscriber
 	write    chan any
 }
 
+// Close stops the bus from accepting new events.
 func (b *Bus) Close() {
 	close(b.write)
 }
 
+// Publish sends evt to subscribers registered for its concrete type.
 func Publish[E any](b *Bus, evt E) {
 	b.write <- evt
 }
@@ -35,6 +34,7 @@ func (b *Bus) pump() {
 	}
 }
 
+// NewBus creates a bus and starts its routing goroutine.
 func NewBus() *Bus {
 	b := &Bus{
 		topics: make(map[reflect.Type][]subscriber, 0),
@@ -44,6 +44,7 @@ func NewBus() *Bus {
 	return b
 }
 
+// Subscribe registers a subscriber for events of type E.
 func Subscribe[E any](b *Bus, evt E) *Subscriber[E] {
 	s := &Subscriber[E]{
 		typ:  reflect.TypeFor[E](),

@@ -1,6 +1,9 @@
 package eventbus
 
-import "sync"
+import (
+	"reflect"
+	"sync"
+)
 
 // a global component that:
 // manage event routes (map)
@@ -8,46 +11,46 @@ import "sync"
 
 type Bus struct {
 	topicsMu sync.Mutex
-	topics   map[string][]*Subscriber
-	write    chan string
+	topics   map[reflect.Type][]subscriber
+	write    chan any
 }
 
 func (b *Bus) Close() {
 	close(b.write)
 }
 
-func (b *Bus) Publish(evt string) {
+func Publish[E any](b *Bus, evt E) {
 	b.write <- evt
 }
 
 func (b *Bus) pump() {
 	for evt := range b.write {
 		b.topicsMu.Lock()
-		subs := b.topics[evt]
+		subs := b.topics[reflect.TypeOf(evt)]
 		b.topicsMu.Unlock()
 
 		for _, sub := range subs {
-			sub.read <- evt
+			sub.dispatch(evt)
 		}
 	}
 }
 
 func NewBus() *Bus {
 	b := &Bus{
-		topics: make(map[string][]*Subscriber, 0),
-		write:  make(chan string),
+		topics: make(map[reflect.Type][]subscriber, 0),
+		write:  make(chan any),
 	}
 	go b.pump()
 	return b
 }
 
-func (b *Bus) Subscribe(evt string) *Subscriber {
-	s := &Subscriber{
-		evt:  evt,
-		read: make(chan string),
+func Subscribe[E any](b *Bus, evt E) *Subscriber[E] {
+	s := &Subscriber[E]{
+		typ:  reflect.TypeFor[E](),
+		read: make(chan E),
 	}
 	b.topicsMu.Lock()
 	defer b.topicsMu.Unlock()
-	b.topics[evt] = append(b.topics[evt], s)
+	b.topics[s.typ] = append(b.topics[s.typ], s)
 	return s
 }

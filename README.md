@@ -3,6 +3,8 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/jrmhx/eventbus.svg)](https://pkg.go.dev/github.com/jrmhx/eventbus)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jrmhx/eventbus)](https://goreportcard.com/report/github.com/jrmhx/eventbus)
 
+## Overview
+
 Package eventbus provides a small typed in-process event bus.
 
 This is an early v0.1.0 implementation. It is intentionally simple: events are

@@ -7,6 +7,9 @@ package queue
 // allowing callers to acknowledge processing before removing
 // an item from the queue.
 type Queue[T any] interface {
+	// Init a queue with capacity of n
+	New(int) *Queue[T]
+
 	// Add inserts v into the queue.
 	// It returns false if the queue is full.
 	Add(T) bool

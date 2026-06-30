@@ -29,4 +29,7 @@ type Queue[T any] interface {
 
 	// Len returns the number of elements currently in the queue.
 	Len() int
+
+	// Cap returns the capacity of the queue, 0 if its unbounded queue
+	Cap() int
 }
